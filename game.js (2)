@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدقق أسماء المستخدمين الرباعية في إنستغرام - محسن</title>
+    <style>
+        :root {
+            --primary-color: #405DE6;
+            --secondary-color: #5851DB;
+            --accent-color: #833AB4;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+            --available-color: #4CAF50;
+            --taken-color: #F44336;
+            --warning-color: #FF9800;
+            --error-color: #dc3545;
+            --success-color: #28a745;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            width: 100%;
+            padding: 2rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo span {
+            color: #FFDC80;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            padding: 2rem;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .generator-section, .results-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--light-bg);
+            padding-bottom: 0.8rem;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            right: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to left, var(--primary-color), var(--accent-color));
+        }
+        
+        .security-notice {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .security-notice::before {
+            content: '🔒';
+            font-size: 2rem;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            opacity: 0.3;
+        }
+        
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-field {
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        
+        input, select, textarea, button {
+            padding: 1rem 1.2rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(64, 93, 230, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(64, 93, 230, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button.secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+        
+        button.success {
+            background: linear-gradient(135deg, var(--success-color), #1e7e34);
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .username-card {
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+        }
+        
+        .username-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .username-card.available {
+            border-color: var(--available-color);
+            background: linear-gradient(135deg, #f8fff9, #e8f5e8);
+        }
+        
+        .username-card.taken {
+            border-color: var(--taken-color);
+            background: linear-gradient(135deg, #fff8f8, #ffe8e8);
+        }
+        
+        .username-card.error {
+            border-color: var(--warning-color);
+            background: linear-gradient(135deg, #fffaf0, #ffeaa7);
+        }
+        
+        .username-text {
+            font-weight: bold;
+            font-size: 1.1rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .status {
+            font-size: 0.9rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status.available {
+            background: linear-gradient(135deg, var(--available-color), #45a049);
+        }
+        
+        .status.taken {
+            background: linear-gradient(135deg, var(--taken-color), #da190b);
+        }
+        
+        .status.error {
+            background: linear-gradient(135deg, var(--warning-color), #f57c00);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--light-bg), #e9ecef);
+            border-radius: 16px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .available-count {
+            color: var(--available-color);
+        }
+        
+        .taken-count {
+            color: var(--taken-color);
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #e9ecef;
+            border-radius: 6px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transition: width 0.3s ease;
+            border-radius: 6px;
+            position: relative;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .export-section {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .alert {
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .alert.success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 2px solid var(--available-color);
+        }
+        
+        .alert.warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 2px solid #ffc107;
+        }
+        
+        .alert.error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 2px solid var(--error-color);
+        }
+        
+        .search-method {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .search-method-option {
+            position: relative;
+        }
+        
+        .search-method-option input[type="radio"] {
+            display: none;
+        }
+        
+        .search-method-option label {
+            display: block;
+            padding: 1.5rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .search-method-option input[type="radio"]:checked + label {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(64, 93, 230, 0.1), rgba(131, 58, 180, 0.1));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(64, 93, 230, 0.2);
+        }
+        
+        .rate-limit-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .proxy-settings {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            border: 1px solid #dee2e6;
+        }
+        
+        .advanced-settings {
+            margin-top: 1rem;
+            padding: 1rem 0;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .toggle-advanced {
+            background: none;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 0.5rem 1rem;
+            width: auto;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                margin: 1rem;
+            }
+            
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .export-section {
+                flex-direction: column;
+            }
+        }
+        
+        .copy-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">إنستغرام <span>مدقق الأسماء</span></div>
+        <p class="subtitle">أداة متقدمة للعثور على أسماء المستخدمين الرباعية المتاحة في إنستغرام</p>
+    </header>
+    
+    <div class="container">
+        <div class="security-notice">
+            <h3>🔒 حماية متقدمة مع تقنيات تجنب الحظر</h3>
+            <p>هذه الأداة تستخدم تقنيات متقدمة لتجنب الحظر وضمان الفحص الآمن والفعال</p>
+        </div>
+        
+        <div class="alert success" id="success-alert">
+            🎉 تم العثور على <span id="available-count">0</span> أسماء مستخدمين متاحة بنجاح!
+        </div>
+        
+        <div class="alert warning" id="warning-alert">
+            ⚠️ تنبيه: استخدم هذه الأداة بمسؤولية ولا تقم بإجراء فحص كثيف لتجنب الحظر
+        </div>
+        
+        <div class="alert error" id="error-alert">
+            ❌ حدث خطأ أثناء الفحص. يرجى المحاولة مرة أخرى.
+        </div>
+        
+        <div class="generator-section">
+            <h2 class="section-title">⚙️ إعدادات البحث</h2>
+            
+            <div class="search-method">
+                <div class="search-method-option">
+                    <input type="radio" id="method-auto" name="search-method" checked>
+                    <label for="method-auto">
+                        <strong>🎲 إنشاء تلقائي</strong>
+                        <p>إنشاء أسماء مستخدمين رباعية عشوائية</p>
+                    </label>
+                </div>
+                
+                <div class="search-method-option">
+                    <input type="radio" id="method-custom" name="search-method">
+                    <label for="method-custom">
+                        <strong>📝 قائمة مخصصة</strong>
+                        <p>فحص أسماء محددة يدوياً</p>
+                    </label>
+                </div>
+                
+                <div class="search-method-option">
+                    <input type="radio" id="method-pattern" name="search-method">
+                    <label for="method-pattern">
+                        <strong>🔤 نمط محدد</strong>
+                        <p>إنشاء أسماء بنمط معين</p>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <div class="input-field" id="auto-options">
+                    <label for="username-count">🔢 عدد أسماء المستخدمين المراد فحصها:</label>
+                    <input type="number" id="username-count" min="1" max="500" value="50">
+                </div>
+                
+                <div class="input-field" id="custom-options" style="display:none;">
+                    <label for="custom-usernames">📋 قائمة أسماء المستخدمين (مفصولة بفواصل أو أسطر جديدة):</label>
+                    <textarea id="custom-usernames" rows="4" placeholder="مثال: haya, noor, amal, leen"></textarea>
+                </div>
+                
+                <div class="input-field" id="pattern-options" style="display:none;">
+                    <label for="pattern-text">🎯 النمط المطلوب (استخدم * للأحرف العشوائية):</label>
+                    <input type="text" id="pattern-text" placeholder="مثال: a***, *b**, **cd" maxlength="4">
+                    <small>مثال: a*** سينشئ أسماء تبدأ بحرف a</small>
+                </div>
+                
+                <div class="input-field">
+                    <label for="threads">⚡ عدد العمليات المتوازية:</label>
+                    <select id="threads">
+                        <option value="1">1 (بطيء - آمن جداً)</option>
+                        <option value="2" selected>2 (متوسط - آمن)</option>
+                        <option value="3">3 (سريع - متوازن)</option>
+                        <option value="4">4 (سريع جداً - مخاطرة قليلة)</option>
+                    </select>
+                </div>
+                
+                <div class="input-field">
+                    <label for="delay">⏱️ التأخير بين الطلبات (ميلي ثانية):</label>
+                    <select id="delay">
+                        <option value="2000">2000ms (آمن جداً)</option>
+                        <option value="1500" selected>1500ms (آمن)</option>
+                        <option value="1000">1000ms (متوازن)</option>
+                        <option value="500">500ms (سريع)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="toggle-advanced" id="toggle-advanced">⚙️ إعدادات متقدمة</button>
+            
+            <div class="advanced-settings" id="advanced-settings" style="display:none;">
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="user-agent">🌐 User Agent مخصص:</label>
+                        <select id="user-agent">
+                            <option value="default">افتراضي</option>
+                            <option value="mobile">موبايل</option>
+                            <option value="random">عشوائي</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="retry-count">🔄 عدد المحاولات عند الفشل:</label>
+                        <select id="retry-count">
+                            <option value="1">1</option>
+                            <option value="2" selected>2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rate-limit-info">
+                💡 نصيحة: للحصول على أفضل النتائج وتجنب الحظر، استخدم إعدادات آمنة وتجنب الفحص المكثف
+            </div>
+            
+            <div class="button-group">
+                <button id="start-scan">
+                    🚀 بدء الفحص
+                    <span class="loading" id="scan-loading" style="display:none;"></span>
+                </button>
+                <button id="pause-scan" class="secondary" disabled>⏸️ إيقاف مؤقت</button>
+                <button id="stop-scan" class="secondary" disabled>⏹️ إيقاف</button>
+                <button id="clear-results" class="danger">🗑️ مسح النتائج</button>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <div class="results-section">
+            <h2 class="section-title">📊 النتائج</h2>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-count">0</div>
+                    <div class="stat-label">إجمالي المفحوصة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value available-count" id="available-stat">0</div>
+                    <div class="stat-label">متاحة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value taken-count" id="taken-stat">0</div>
+                    <div class="stat-label">محجوزة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="error-stat">0</div>
+                    <div class="stat-label">أخطاء</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="speed-stat">0</div>
+                    <div class="stat-label">فحص/دقيقة</div>
+                </div>
+            </div>
+            
+            <div class="export-section">
+                <button id="export-available" class="success">💾 تصدير المتاحة</button>
+                <button id="export-all" class="secondary">📄 تصدير الكل</button>
+                <button id="copy-available" class="success">📋 نسخ المتاحة</button>
+            </div>
+            
+            <div class="results-grid" id="results-container">
+                <!-- سيتم ملء النتائج هنا -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // إعدادات الحماية والأمان
+        const SECURITY_CONFIG = {
+            maxRequestsPerMinute: 30,
+            baseDelay: 1500,
+            maxRetries: 2,
+            timeoutDuration: 10000,
+            userAgents: [
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            ]
+        };
+        
+        // متغيرات حالة التطبيق
+        let scanState = {
+            isScanning: false,
+            isPaused: false,
+            scanRequestQueue: [],
+            currentThreads: 0,
+            maxThreads: 2,
+            totalUsernames: 0,
+            scannedUsernames: 0,
+            availableUsernames: 0,
+            takenUsernames: 0,
+            errorCount: 0,
+            startTime: null,
+            results: new Map(),
+            stopRequested: false,
+            pauseRequested: false,
+            requestHistory: []
+        };
+        
+        // عناصر DOM
+        const elements = {
+            usernameCountInput: document.getElementById('username-count'),
+            customUsernamesTextarea: document.getElementById('custom-usernames'),
+            patternTextInput: document.getElementById('pattern-text'),
+            autoOptions: document.getElementById('auto-options'),
+            customOptions: document.getElementById('custom-options'),
+            patternOptions: document.getElementById('pattern-options'),
+            threadsSelect: document.getElementById('threads'),
+            delaySelect: document.getElementById('delay'),
+            userAgentSelect: document.getElementById('user-agent'),
+            retryCountSelect: document.getElementById('retry-count'),
+            startScanBtn: document.getElementById('start-scan'),
+            pauseScanBtn: document.getElementById('pause-scan'),
+            stopScanBtn: document.getElementById('stop-scan'),
+            clearResultsBtn: document.getElementById('clear-results'),
+            toggleAdvancedBtn: document.getElementById('toggle-advanced'),
+            advancedSettings: document.getElementById('advanced-settings'),
+            scanLoading: document.getElementById('scan-loading'),
+            progressBar: document.getElementById('progress-bar'),
+            resultsContainer: document.getElementById('results-container'),
+            totalCountElement: document.getElementById('total-count'),
+            availableStat: document.getElementById('available-stat'),
+            takenStat: document.getElementById('taken-stat'),
+            errorStat: document.getElementById('error-stat'),
+            speedStat: document.getElementById('speed-stat'),
+            successAlert: document.getElementById('success-alert'),
+            warningAlert: document.getElementById('warning-alert'),
+            errorAlert: document.getElementById('error-alert'),
+            availableCountElement: document.getElementById('available-count'),
+            exportAvailableBtn: document.getElementById('export-available'),
+            exportAllBtn: document.getElementById('export-all'),
+            copyAvailableBtn: document.getElementById('copy-available'),
+            methodAuto: document.getElementById('method-auto'),
+            methodCustom: document.getElementById('method-custom'),
+            methodPattern: document.getElementById('method-pattern')
+        };
+        
+        // الأحرف المسموحة في أسماء المستخدمين
+        const allowedChars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        const lettersOnly = 'abcdefghijklmnopqrstuvwxyz';
+        
+        // إظهار تنبيه الاستخدام المسؤول
+        elements.warningAlert.style.display = 'block';
+        
+        // مستمعي الأحداث لتغيير طريقة البحث
+        elements.methodAuto.addEventListener('change', () => {
+            if (elements.methodAuto.checked) {
+                elements.autoOptions.style.display = 'block';
+                elements.customOptions.style.display = 'none';
+                elements.patternOptions.style.display = 'none';
+            }
+        });
+        
+        elements.methodCustom.addEventListener('change', () => {
+            if (elements.methodCustom.checked) {
+                elements.autoOptions.style.display = 'none';
+                elements.customOptions.style.display = 'block';
+                elements.patternOptions.style.display = 'none';
+            }
+        });
+        
+        elements.methodPattern.addEventListener('change', () => {
+            if (elements.methodPattern.checked) {
+                elements.autoOptions.style.display = 'none';
+                elements.customOptions.style.display = 'none';
+                elements.patternOptions.style.display = 'block';
+            }
+        });
+        
+        // إظهار/إخفاء الإعدادات المتقدمة
+        elements.toggleAdvancedBtn.addEventListener('click', () => {
+            const isVisible = elements.advancedSettings.style.display !== 'none';
+            elements.advancedSettings.style.display = isVisible ? 'none' : 'block';
+            elements.toggleAdvancedBtn.textContent = isVisible ? '⚙️ إعدادات متقدمة' : '🔼 إخفاء الإعدادات';
+        });
+        
+        // بدء عملية الفحص
+        elements.startScanBtn.addEventListener('click', async () => {
+            if (scanState.isScanning) return;
+            
+            // التحقق من صحة المدخلات
+            if (!validateInputs()) return;
+            
+            // إعادة تعيين حالة التطبيق
+            resetScanState();
+            
+            // تحديث واجهة المستخدم
+            updateUIForScanStart();
+            
+            // تحديد الإعدادات
+            applyScanSettings();
+            
+            // إنشاء قائمة أسماء المستخدمين
+            const usernames = await generateUsernames();
+            if (!usernames || usernames.length === 0) {
+                showError('فشل في إنشاء قائمة أسماء المستخدمين');
+                resetScan();
+                return;
+            }
+            
+            // بدء عملية الفحص
+            scanState.scanRequestQueue = [...usernames];
+            scanState.totalUsernames = usernames.length;
+            scanState.startTime = new Date();
+            
+            startScanProcess();
+        });
+        
+        // إيقاف مؤقت للفحص
+        elements.pauseScanBtn.addEventListener('click', () => {
+            if (!scanState.isScanning) return;
+            
+            if (scanState.isPaused) {
+                // استئناف الفحص
+                scanState.isPaused = false;
+                scanState.pauseRequested = false;
+                elements.pauseScanBtn.textContent = '⏸️ إيقاف مؤقت';
+                elements.pauseScanBtn.className = 'secondary';
+                startScanProcess();
+            } else {
+                // إيقاف مؤقت
+                scanState.pauseRequested = true;
+                elements.pauseScanBtn.textContent = '▶️ استئناف';
+                elements.pauseScanBtn.className = 'success';
+            }
+        });
+        
+        // إيقاف الفحص نهائياً
+        elements.stopScanBtn.addEventListener('click', () => {
+            if (!scanState.isScanning) return;
+            scanState.stopRequested = true;
+            elements.stopScanBtn.disabled = true;
+        });
+        
+        // مسح النتائج
+        elements.clearResultsBtn.addEventListener('click', () => {
+            if (confirm('هل أنت متأكد من مسح جميع النتائج؟')) {
+                clearResults();
+            }
+        });
+        
+        // تصدير أسماء المستخدمين المتاحة
+        elements.exportAvailableBtn.addEventListener('click', () => {
+            exportResults('available');
+        });
+        
+        // تصدير جميع النتائج
+        elements.exportAllBtn.addEventListener('click', () => {
+            exportResults('all');
+        });
+        
+        // نسخ أسماء المستخدمين المتاحة
+        elements.copyAvailableBtn.addEventListener('click', () => {
+            copyAvailableToClipboard();
+        });
+        
+        // التحقق من صحة المدخلات
+        function validateInputs() {
+            if (elements.methodAuto.checked) {
+                const count = parseInt(elements.usernameCountInput.value);
+                if (!count || count < 1 || count > 500) {
+                    showError('يرجى إدخال عدد صحيح بين 1 و 500');
+                    return false;
+                }
+            } else if (elements.methodCustom.checked) {
+                const text = elements.customUsernamesTextarea.value.trim();
+                if (!text) {
+                    showError('يرجى إدخال قائمة أسماء المستخدمين');
+                    return false;
+                }
+            } else if (elements.methodPattern.checked) {
+                const pattern = elements.patternTextInput.value.trim();
+                if (!pattern || pattern.length !== 4) {
+                    showError('يرجى إدخال نمط من 4 أحرف');
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // إعادة تعيين حالة الفحص
+        function resetScanState() {
+            scanState.isScanning = true;
+            scanState.isPaused = false;
+            scanState.stopRequested = false;
+            scanState.pauseRequested = false;
+            scanState.scanRequestQueue = [];
+            scanState.currentThreads = 0;
+            scanState.scannedUsernames = 0;
+            scanState.availableUsernames = 0;
+            scanState.takenUsernames = 0;
+            scanState.errorCount = 0;
+            scanState.startTime = null;
+            scanState.requestHistory = [];
+        }
+        
+        // تحديث واجهة المستخدم عند بدء الفحص
+        function updateUIForScanStart() {
+            elements.startScanBtn.disabled = true;
+            elements.pauseScanBtn.disabled = false;
+            elements.stopScanBtn.disabled = false;
+            elements.scanLoading.style.display = 'block';
+            elements.successAlert.style.display = 'none';
+            elements.errorAlert.style.display = 'none';
+            elements.progressBar.style.width = '0%';
+            updateStats();
+        }
+        
+        // تطبيق إعدادات الفحص
+        function applyScanSettings() {
+            scanState.maxThreads = parseInt(elements.threadsSelect.value);
+            SECURITY_CONFIG.baseDelay = parseInt(elements.delaySelect.value);
+            SECURITY_CONFIG.maxRetries = parseInt(elements.retryCountSelect.value);
+        }
+        
+        // إنشاء أسماء المستخدمين حسب الطريقة المختارة
+        async function generateUsernames() {
+            let usernames = [];
+            
+            if (elements.methodAuto.checked) {
+                const count = parseInt(elements.usernameCountInput.value);
+                usernames = generateRandomUsernames(count);
+            } else if (elements.methodCustom.checked) {
+                const text = elements.customUsernamesTextarea.value.trim();
+                usernames = parseCustomUsernames(text);
+            } else if (elements.methodPattern.checked) {
+                const pattern = elements.patternTextInput.value.trim();
+                const count = parseInt(elements.usernameCountInput.value) || 50;
+                usernames = generatePatternUsernames(pattern, count);
+            }
+            
+            // تنظيف وتصفية أسماء المستخدمين
+            usernames = usernames
+                .map(u => u.toLowerCase().trim())
+                .filter(u => u.length === 4 && /^[a-z0-9]+$/.test(u))
+                .filter((u, i, arr) => arr.indexOf(u) === i); // إزالة المكررات
+            
+            return usernames;
+        }
+        
+        // إنشاء أسماء مستخدمين عشوائية
+        function generateRandomUsernames(count) {
+            const usernames = new Set();
+            
+            while (usernames.size < count) {
+                let username = '';
+                for (let i = 0; i < 4; i++) {
+                    username += allowedChars[Math.floor(Math.random() * allowedChars.length)];
+                }
+                
+                // تجنب الأسماء التي تحتوي على أرقام فقط
+                if (!/^\d+$/.test(username)) {
+                    usernames.add(username);
+                }
+            }
+            
+            return Array.from(usernames);
+        }
+        
+        // معالجة أسماء المستخدمين المخصصة
+        function parseCustomUsernames(text) {
+            return text.split(/[\s,\n]+/).filter(u => u.trim() !== '');
+        }
+        
+        // إنشاء أسماء مستخدمين بنمط محدد
+        function generatePatternUsernames(pattern, count) {
+            const usernames = new Set();
+            const wildcardPositions = [];
+            
+            // تحديد مواقع الأحرف العشوائية
+            for (let i = 0; i < pattern.length; i++) {
+                if (pattern[i] === '*') {
+                    wildcardPositions.push(i);
+                }
+            }
+            
+            while (usernames.size < count) {
+                let username = pattern;
+                
+                for (const pos of wildcardPositions) {
+                    const randomChar = allowedChars[Math.floor(Math.random() * allowedChars.length)];
+                    username = username.substring(0, pos) + randomChar + username.substring(pos + 1);
+                }
+                
+                if (!/^\d+$/.test(username)) {
+                    usernames.add(username);
+                }
+            }
+            
+            return Array.from(usernames);
+        }
+        
+        // بدء عملية الفحص المتوازي
+        function startScanProcess() {
+            if (scanState.stopRequested || scanState.pauseRequested) return;
+            
+            // تشغيل عدد كافي من الخيوط
+            while (scanState.currentThreads < scanState.maxThreads && 
+                   scanState.scanRequestQueue.length > 0 && 
+                   !scanState.stopRequested && 
+                   !scanState.pauseRequested) {
+                
+                const username = scanState.scanRequestQueue.shift();
+                scanState.currentThreads++;
+                checkUsernameWithRetry(username);
+            }
+            
+            // إذا انتهت جميع المهام
+            if (scanState.scanRequestQueue.length === 0 && scanState.currentThreads === 0) {
+                finishScan();
+            }
+        }
+        
+        // فحص اسم مستخدم مع إعادة المحاولة
+        async function checkUsernameWithRetry(username, retryCount = 0) {
+            try {
+                // التحقق من التكرار
+                if (scanState.results.has(username)) {
+                    threadCompleted();
+                    return;
+                }
+                
+                // تطبيق التأخير للحماية من الحظر
+                const delay = calculateDelay();
+                await sleep(delay);
+                
+                // فحص اسم المستخدم
+                const result = await checkInstagramUsername(username);
+                
+                // تسجيل النتيجة
+                scanState.results.set(username, result);
+                updateCounters(result);
+                addResultCard(username, result);
+                
+            } catch (error) {
+                console.error(`خطأ في فحص ${username}:`, error);
+                
+                // إعادة المحاولة إذا كان ممكناً
+                if (retryCount < SECURITY_CONFIG.maxRetries) {
+                    await sleep(2000); // انتظار إضافي قبل إعادة المحاولة
+                    checkUsernameWithRetry(username, retryCount + 1);
+                    return;
+                }
+                
+                // تسجيل كخطأ
+                scanState.results.set(username, 'error');
+                scanState.errorCount++;
+                addResultCard(username, 'error');
+            }
+            
+            threadCompleted();
+        }
+        
+        // حساب التأخير المناسب
+        function calculateDelay() {
+            // تسجيل الطلب في التاريخ
+            const now = Date.now();
+            scanState.requestHistory = scanState.requestHistory.filter(
+                time => now - time < 60000 // الاحتفاظ بتاريخ آخر دقيقة فقط
+            );
+            scanState.requestHistory.push(now);
+            
+            // حساب التأخير بناء على معدل الطلبات
+            const requestsInLastMinute = scanState.requestHistory.length;
+            let delay = SECURITY_CONFIG.baseDelay;
+            
+            if (requestsInLastMinute > SECURITY_CONFIG.maxRequestsPerMinute * 0.8) {
+                delay *= 2; // مضاعفة التأخير إذا اقتربنا من الحد الأقصى
+            }
+            
+            return delay + Math.random() * 500; // إضافة تأخير عشوائي
+        }
+        
+        // فحص اسم المستخدم في إنستغرام
+        async function checkInstagramUsername(username) {
+            try {
+                // استخدام طريقة آمنة للفحص عبر الويب
+                const response = await fetch(`https://www.instagram.com/${username}/`, {
+                    method: 'HEAD',
+                    headers: {
+                        'User-Agent': getRandomUserAgent(),
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        'Accept-Language': 'en-US,en;q=0.5',
+                        'Accept-Encoding': 'gzip, deflate',
+                        'Connection': 'keep-alive',
+                        'Upgrade-Insecure-Requests': '1'
+                    },
+                    cache: 'no-cache',
+                    timeout: SECURITY_CONFIG.timeoutDuration
+                });
+                
+                // تحليل النتيجة
+                if (response.status === 404) {
+                    return 'available';
+                } else if (response.status === 200) {
+                    return 'taken';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.warn(`فشل فحص ${username}:`, error.message);
+                throw error;
+            }
+        }
+        
+        // الحصول على User Agent عشوائي
+        function getRandomUserAgent() {
+            const userAgentSetting = elements.userAgentSelect.value;
+            
+            if (userAgentSetting === 'mobile') {
+                return 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Mobile/15E148 Safari/604.1';
+            } else if (userAgentSetting === 'random') {
+                return SECURITY_CONFIG.userAgents[Math.floor(Math.random() * SECURITY_CONFIG.userAgents.length)];
+            } else {
+                return navigator.userAgent;
+            }
+        }
+        
+        // تحديث العدادات
+        function updateCounters(result) {
+            scanState.scannedUsernames++;
+            
+            if (result === 'available') {
+                scanState.availableUsernames++;
+            } else if (result === 'taken') {
+                scanState.takenUsernames++;
+            }
+        }
+        
+        // إضافة بطاقة نتيجة
+        function addResultCard(username, result) {
+            const card = document.createElement('div');
+            card.className = `username-card ${result}`;
+            
+            const statusText = {
+                'available': 'متاح',
+                'taken': 'محجوز',
+                'error': 'خطأ'
+            };
+            
+            card.innerHTML = `
+                <div class="username-text">@${username}</div>
+                <div>
+                    <button class="copy-btn" onclick="copyToClipboard('${username}')">نسخ</button>
+                    <span class="status ${result}">${statusText[result]}</span>
+                </div>
+            `;
+            
+            // إضافة إلى بداية القائمة
+            elements.resultsContainer.insertBefore(card, elements.resultsContainer.firstChild);
+            
+            // تحديث الإحصائيات
+            updateStats();
+        }
+        
+        // إكمال مهمة خيط
+        function threadCompleted() {
+            scanState.currentThreads--;
+            updateStats();
+            
+            // متابعة الفحص إذا لم يتم الإيقاف
+            if (!scanState.stopRequested && !scanState.pauseRequested) {
+                setTimeout(startScanProcess, 100);
+            } else if (scanState.pauseRequested) {
+                scanState.isPaused = true;
+            }
+        }
+        
+        // تحديث الإحصائيات
+        function updateStats() {
+            elements.totalCountElement.textContent = scanState.scannedUsernames;
+            elements.availableStat.textContent = scanState.availableUsernames;
+            elements.takenStat.textContent = scanState.takenUsernames;
+            elements.errorStat.textContent = scanState.errorCount;
+            
+            // حساب التقدم
+            if (scanState.totalUsernames > 0) {
+                const progress = (scanState.scannedUsernames / scanState.totalUsernames) * 100;
+                elements.progressBar.style.width = `${Math.min(progress, 100)}%`;
+            }
+            
+            // حساب السرعة
+            if (scanState.startTime && scanState.scannedUsernames > 0) {
+                const timeElapsed = (new Date() - scanState.startTime) / 1000 / 60; // بالدقائق
+                if (timeElapsed > 0) {
+                    const speed = (scanState.scannedUsernames / timeElapsed).toFixed(1);
+                    elements.speedStat.textContent = speed;
+                }
+            }
+        }
+        
+        // إنهاء الفحص
+        function finishScan() {
+            scanState.isScanning = false;
+            resetUIAfterScan();
+            
+            if (scanState.availableUsernames > 0) {
+                elements.successAlert.style.display = 'block';
+                elements.availableCountElement.textContent = scanState.availableUsernames;
+            }
+            
+            elements.progressBar.style.width = '100%';
+        }
+        
+        // إعادة تعيين واجهة المستخدم بعد الفحص
+        function resetUIAfterScan() {
+            elements.startScanBtn.disabled = false;
+            elements.pauseScanBtn.disabled = true;
+            elements.stopScanBtn.disabled = true;
+            elements.scanLoading.style.display = 'none';
+            elements.pauseScanBtn.textContent = '⏸️ إيقاف مؤقت';
+            elements.pauseScanBtn.className = 'secondary';
+        }
+        
+        // إعادة تعيين الفحص
+        function resetScan() {
+            scanState.isScanning = false;
+            scanState.stopRequested = false;
+            resetUIAfterScan();
+        }
+        
+        // مسح النتائج
+        function clearResults() {
+            elements.resultsContainer.innerHTML = '';
+            scanState.results.clear();
+            scanState.scannedUsernames = 0;
+            scanState.availableUsernames = 0;
+            scanState.takenUsernames = 0;
+            scanState.errorCount = 0;
+            updateStats();
+            elements.successAlert.style.display = 'none';
+        }
+        
+        // تصدير النتائج
+        function exportResults(type) {
+            let data = '';
+            const timestamp = new Date().toLocaleString('ar-SA');
+            
+            if (type === 'available') {
+                if (scanState.availableUsernames === 0) {
+                    showError('لا توجد أسماء مستخدمين متاحة للتصدير');
+                    return;
+                }
+                
+                data = `أسماء المستخدمين المتاحة في إنستغرام\nتاريخ التصدير: ${timestamp}\n\n`;
+                for (const [username, status] of scanState.results) {
+                    if (status === 'available') {
+                        data += `@${username}\n`;
+                    }
+                }
+                downloadFile('اسماء_متاحة_انستغرام.txt', data);
+                
+            } else if (type === 'all') {
+                if (scanState.results.size === 0) {
+                    showError('لا توجد نتائج للتصدير');
+                    return;
+                }
+                
+                data = `جميع نتائج فحص أسماء المستخدمين\nتاريخ التصدير: ${timestamp}\n\n`;
+                data += `الإحصائيات:\n`;
+                data += `- إجمالي المفحوصة: ${scanState.scannedUsernames}\n`;
+                data += `- المتاحة: ${scanState.availableUsernames}\n`;
+                data += `- المحجوزة: ${scanState.takenUsernames}\n`;
+                data += `- أخطاء: ${scanState.errorCount}\n\n`;
+                
+                const statusText = {
+                    'available': 'متاح',
+                    'taken': 'محجوز',
+                    'error': 'خطأ'
+                };
+                
+                for (const [username, status] of scanState.results) {
+                    data += `@${username} - ${statusText[status]}\n`;
+                }
+                downloadFile('جميع_النتائج_انستغرام.txt', data);
+            }
+        }
+        
+        // نسخ الأسماء المتاحة إلى الحافظة
+        async function copyAvailableToClipboard() {
+            if (scanState.availableUsernames === 0) {
+                showError('لا توجد أسماء مستخدمين متاحة للنسخ');
+                return;
+            }
+            
+            const availableUsernames = [];
+            for (const [username, status] of scanState.results) {
+                if (status === 'available') {
+                    availableUsernames.push(`@${username}`);
+                }
+            }
+            
+            try {
+                await navigator.clipboard.writeText(availableUsernames.join('\n'));
+                showSuccess(`تم نسخ ${availableUsernames.length} اسم مستخدم متاح إلى الحافظة!`);
+            } catch (error) {
+                showError('فشل في نسخ البيانات إلى الحافظة');
+            }
+        }
+        
+        // نسخ اسم مستخدم واحد
+        async function copyToClipboard(username) {
+            try {
+                await navigator.clipboard.writeText(username);
+                showSuccess(`تم نسخ @${username} إلى الحافظة!`);
+            } catch (error) {
+                showError('فشل في نسخ اسم المستخدم');
+            }
+        }
+        
+        // تنزيل ملف
+        function downloadFile(filename, content) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+        
+        // عرض رسالة نجاح
+        function showSuccess(message) {
+            elements.successAlert.innerHTML = `🎉 ${message}`;
+            elements.successAlert.style.display = 'block';
+            setTimeout(() => {
+                elements.successAlert.style.display = 'none';
+            }, 5000);
+        }
+        
+        // عرض رسالة خطأ
+        function showError(message) {
+            elements.errorAlert.innerHTML = `❌ ${message}`;
+            elements.errorAlert.style.display = 'block';
+            setTimeout(() => {
+                elements.errorAlert.style.display = 'none';
+            }, 5000);
+        }
+        
+        // دالة انتظار
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // جعل وظيفة النسخ متاحة عالمياً
+        window.copyToClipboard = copyToClipboard;
+        
+        // معالج إيقاف الصفحة
+        window.addEventListener('beforeunload', (e) => {
+            if (scanState.isScanning) {
+                e.preventDefault();
+                e.returnValue = 'جاري تشغيل عملية فحص. هل أنت متأكد من إغلاق الصفحة؟';
+            }
+        });
+        
+    </script>
+</body>
+</html>
